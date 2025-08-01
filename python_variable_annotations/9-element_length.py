@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""This module provides a function that returns the length of elements in an iterable."""
+"""This module provides a function that returns element lengths."""
 
 from typing import Iterable, Sequence, List, Tuple
 
@@ -11,6 +11,6 @@ def element_length(lst: Iterable[Sequence]) -> List[Tuple[Sequence, int]]:
         lst (Iterable[Sequence]): An iterable of sequence objects.
 
     Returns:
-        List[Tuple[Sequence, int]]: A list of tuples, each containing a sequence and its length.
+        List[Tuple[Sequence, int]]: List of tuples with sequence and length.
     """
     return [(i, len(i)) for i in lst]

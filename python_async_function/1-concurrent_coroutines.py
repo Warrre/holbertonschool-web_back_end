@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""This module provides an async routine to run multiple wait_random coroutines."""
+"""This module provides an async routine for multiple coroutines."""
 
 import asyncio
 from typing import List
@@ -7,7 +7,7 @@ wait_random = __import__('0-basic_async_syntax').wait_random
 
 async def wait_n(n: int, max_delay: int) -> List[float]:
     """
-    Spawn wait_random n times with the specified max_delay and return the list of delays.
+    Spawn wait_random n times and return the list of delays.
 
     Args:
         n (int): Number of times to spawn wait_random.

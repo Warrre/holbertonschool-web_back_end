@@ -7,7 +7,7 @@ from typing import AsyncGenerator
 
 async def async_generator() -> AsyncGenerator[float, None]:
     """
-    Yield a random float between 0 and 10, 10 times, with a 1 second delay each time.
+    Yield a random float between 0 and 10, 10 times with 1s delay.
 
     Yields:
         float: A random number between 0 and 10.
