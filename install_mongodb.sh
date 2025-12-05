@@ -21,5 +21,8 @@ sudo chown -R mongodb:mongodb /var/lib/mongodb /var/log/mongodb
 # Start mongod
 sudo -u mongodb /usr/bin/mongod --config /etc/mongod.conf &
 
+# Wait for MongoDB to start
+sleep 5
+
 # Verification
 mongod --version
