@@ -4,6 +4,6 @@ const array1 = ['a','b'];
 
 const combined = [...array1, ...array2];
 
-const str = "hello";
+const str = "Hello";
 const char = [...str];
 }
