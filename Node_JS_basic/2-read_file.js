@@ -1,55 +1,35 @@
-const fs = require("fs");
+const fs = require('fs');
 
 function countStudents(path) {
-  let data;
   try {
-    data = fs.readFileSync(path, "utf8");
-  } catch (err) {
-    throw new Error("Cannot load the database");
-  }
+    const data = fs.readFileSync(path, 'utf8');
+    const lines = data.split('\n');
+    const students = lines.slice(1);
+    const validStudents = students.filter((line) => line.trim() !== '');
+    const total = validStudents.length;
 
-  const lines = data
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+    console.log(`Number of students: ${total}`);
 
-  if (lines.length === 0) {
-    console.log("Number of students: 0");
-    return;
-  }
-
-  // Remove header
-  const header = lines[0].split(",");
-  const students = lines.slice(1);
-
-  console.log(`Number of students: ${students.length}`);
-
-  const fieldMap = {};
-  const fieldOrder = [];
-
-  students.forEach((line) => {
-    const parts = line.split(",");
-    if (parts.length >= header.length) {
-      const firstName = parts[0];
-      const field = parts[3];
-
-      if (!fieldMap[field]) {
-        fieldMap[field] = { count: 0, list: [] };
-        fieldOrder.push(field);
+    const fields = {};
+    validStudents.forEach((line) => {
+      const parts = line.split(',');
+      const firstname = parts[0].trim();
+      const field = parts[parts.length - 1].trim();
+      if (!fields[field]) {
+        fields[field] = [];
       }
-      fieldMap[field].count += 1;
-      fieldMap[field].list.push(firstName);
-    }
-  });
+      fields[field].push(firstname);
+    });
 
-  fieldOrder.forEach((field) => {
-    const info = fieldMap[field];
-    console.log(
-      `Number of students in ${field}: ${info.count}. List: ${info.list.join(
-        ", "
-      )}`
-    );
-  });
+    for (const field in fields) {
+      if (Object.prototype.hasOwnProperty.call(fields, field)) {
+        const list = fields[field].join(', ');
+        console.log(`Number of students in ${field}: ${fields[field].length}. List: ${list}`);
+      }
+    }
+  } catch (err) {
+    throw new Error('Cannot load the database');
+  }
 }
 
 module.exports = countStudents;
