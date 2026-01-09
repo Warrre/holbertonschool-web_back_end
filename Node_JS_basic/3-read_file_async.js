@@ -8,52 +8,41 @@ function countStudents(path) {
         return;
       }
 
-      const lines = data
-        .split("\n")
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0);
+      const fs = require('fs');
 
-      if (lines.length === 0) {
-        console.log("Number of students: 0");
-        resolve();
-        return;
+      function countStudents(path) {
+        return new Promise((resolve, reject) => {
+          fs.readFile(path, 'utf8', (err, data) => {
+            try {
+              const lines = data.split('\n').slice(1).filter((line) => line.trim());
+              const students = lines
+                .map((line) => {
+                  const parts = line.split(',');
+                  return { firstname: parts[0], field: parts[parts.length - 1] };
+                })
+                .filter((student) => student.firstname && student.field);
+
+              const studentsByField = {};
+              students.forEach(({ firstname, field }) => {
+                if (!studentsByField[field]) { studentsByField[field] = []; }
+                studentsByField[field].push(firstname);
+              });
+
+              console.log(`Number of students: ${students.length}`);
+
+              for (const fieldName in studentsByField) {
+                if (studentsByField[fieldName]) {
+                  const listFirstnames = studentsByField[fieldName].join(', ');
+                  console.log(`Number of students in ${fieldName}: ${studentsByField[fieldName].length}. List: ${listFirstnames}`);
+                }
+              }
+              resolve();
+            } catch (err) {
+              reject(new Error('Cannot load the database'));
+            }
+          });
+        });
       }
 
-      const header = lines[0].split(",");
-      const students = lines.slice(1);
-
-      console.log(`Number of students: ${students.length}`);
-
-      const fieldMap = {};
-      const fieldOrder = [];
-
-      students.forEach((line) => {
-        const parts = line.split(",");
-        if (parts.length >= header.length) {
-          const firstName = parts[0];
-          const field = parts[3];
-
-          if (!fieldMap[field]) {
-            fieldMap[field] = { count: 0, list: [] };
-            fieldOrder.push(field);
-          }
-          fieldMap[field].count += 1;
-          fieldMap[field].list.push(firstName);
-        }
-      });
-
-      fieldOrder.forEach((field) => {
-        const info = fieldMap[field];
-        console.log(
+      module.exports = countStudents;
           `Number of students in ${field}: ${
-            info.count
-          }. List: ${info.list.join(", ")}`
-        );
-      });
-
-      resolve();
-    });
-  });
-}
-
-module.exports = countStudents;
