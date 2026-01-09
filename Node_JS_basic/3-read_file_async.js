@@ -1,48 +1,45 @@
-const fs = require("fs");
+const fs = require('fs');
 
 function countStudents(path) {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, "utf8", (err, data) => {
+    fs.readFile(path, 'utf8', (err, data) => {
       if (err) {
-        reject(new Error("Cannot load the database"));
+        reject(new Error('Cannot load the database'));
         return;
       }
 
-      const fs = require('fs');
+      try {
+        const lines = data.split('\n');
+        const students = lines.slice(1);
+        const validStudents = students
+          .map((line) => line.trim())
+          .filter((line) => line !== '')
+          .map((line) => line.split(','))
+          .filter((parts) => parts.length >= 4);
 
-      function countStudents(path) {
-        return new Promise((resolve, reject) => {
-          fs.readFile(path, 'utf8', (err, data) => {
-            try {
-              const lines = data.split('\n').slice(1).filter((line) => line.trim());
-              const students = lines
-                .map((line) => {
-                  const parts = line.split(',');
-                  return { firstname: parts[0], field: parts[parts.length - 1] };
-                })
-                .filter((student) => student.firstname && student.field);
+        console.log(`Number of students: ${validStudents.length}`);
 
-              const studentsByField = {};
-              students.forEach(({ firstname, field }) => {
-                if (!studentsByField[field]) { studentsByField[field] = []; }
-                studentsByField[field].push(firstname);
-              });
-
-              console.log(`Number of students: ${students.length}`);
-
-              for (const fieldName in studentsByField) {
-                if (studentsByField[fieldName]) {
-                  const listFirstnames = studentsByField[fieldName].join(', ');
-                  console.log(`Number of students in ${fieldName}: ${studentsByField[fieldName].length}. List: ${listFirstnames}`);
-                }
-              }
-              resolve();
-            } catch (err) {
-              reject(new Error('Cannot load the database'));
-            }
-          });
+        const fields = {};
+        validStudents.forEach((parts) => {
+          const firstname = parts[0].trim();
+          const field = parts[parts.length - 1].trim();
+          if (!fields[field]) {
+            fields[field] = [];
+          }
+          fields[field].push(firstname);
         });
-      }
 
-      module.exports = countStudents;
-          `Number of students in ${field}: ${
+        Object.keys(fields).forEach((field) => {
+          const list = fields[field].join(', ');
+          console.log(`Number of students in ${field}: ${fields[field].length}. List: ${list}`);
+        });
+
+        resolve();
+      } catch (e) {
+        reject(new Error('Cannot load the database'));
+      }
+    });
+  });
+}
+
+module.exports = countStudents;
