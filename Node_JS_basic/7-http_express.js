@@ -1,33 +1,67 @@
-const express = require("express");
-const countStudents = require("./3-read_file_async");
+const express = require('express');
+const fs = require('fs');
 
-const database = process.argv[2];
+const dbPath = process.argv[2];
+
+function buildStudentsReport(data) {
+  const lines = data.split('\n');
+  const students = lines.slice(1);
+  const validStudents = students
+    .map((line) => line.trim())
+    .filter((line) => line !== '')
+    .map((line) => line.split(','))
+    .filter((parts) => parts.length >= 4);
+
+  const fields = {};
+  validStudents.forEach((parts) => {
+    const firstname = parts[0].trim();
+    const field = parts[parts.length - 1].trim();
+    if (!fields[field]) {
+      fields[field] = [];
+    }
+    fields[field].push(firstname);
+  });
+
+  const out = [];
+  out.push(`Number of students: ${validStudents.length}`);
+  Object.keys(fields).forEach((field) => {
+    const list = fields[field].join(', ');
+    out.push(`Number of students in ${field}: ${fields[field].length}. List: ${list}`);
+  });
+
+  return out.join('\n');
+}
 
 const app = express();
 
-app.get("/", (req, res) => {
-  res.send("Hello Holberton School!");
+app.get('/', (req, res) => {
+  res.set('Content-Type', 'text/plain');
+  res.status(200).send('Hello Holberton School!');
 });
 
-app.get("/students", (req, res) => {
-  const databaseCSV = process.argv[2];
-  const originalLog = console.log;
-  let output = "";
-  console.log = (msg) => {
-    output += `${msg}\n`;
-  };
+app.get('/students', (req, res) => {
+  res.set('Content-Type', 'text/plain');
+  res.status(200);
+  res.write('This is the list of our students\n');
 
-  res.write("This is the list of our students\n");
+  if (!dbPath) {
+    res.end('Cannot load the database');
+    return;
+  }
 
-  countStudents(databaseCSV)
-    .then(() => {
-      console.log = originalLog;
-      res.end(output.trim());
-    })
-    .catch(() => {
-      console.log = originalLog;
-      res.end("Cannot load the database");
-    });
+  fs.readFile(dbPath, 'utf8', (err, data) => {
+    if (err) {
+      res.end('Cannot load the database');
+      return;
+    }
+
+    try {
+      const report = buildStudentsReport(data);
+      res.end(report);
+    } catch (e) {
+      res.end('Cannot load the database');
+    }
+  });
 });
 
 app.listen(1245);
